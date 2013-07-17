@@ -7,7 +7,7 @@ setup(
     license = 'Private',
     description = "",
     author = '',
-    packages = ["checkin"],
+    packages = ["checkin","config"],
     install_requires = ['setuptools',
                         'tornado',
                         'redis',
