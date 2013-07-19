@@ -8,6 +8,7 @@ import tornado.web
 
 from tornado.options import define, options
 from checkin.handler import FeedHandler
+from checkin.handler import NearbyHandler 
 
 define("port", default=8888, help="run on the given port", type=int)
 
@@ -16,6 +17,7 @@ def main():
     tornado.options.parse_command_line()
     application = tornado.web.Application([
         (r"/", FeedHandler),
+        (r"/nearby", NearbyHandler),
     ])
     http_server = tornado.httpserver.HTTPServer(application)
     http_server.listen(options.port)
