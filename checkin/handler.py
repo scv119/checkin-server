@@ -8,7 +8,7 @@ import checkin.network
 
 from redis import Redis
 
-_client = Redis(config.REDIS_HOST, config.REDIS_PORT)
+_client = Redis(config.REDIS_HOST, config.REDIS_PORT, db=15)
 _KEY = "FEED"
 
 class FeedHandler(tornado.web.RequestHandler):
@@ -32,6 +32,8 @@ class NearbyHandler(tornado.web.RequestHandler):
         lat = self.get_argument('lat', 0)
         lng   = self.get_argument('lng', 0)
         query   = self.get_argument('query', None) 
+        offset  = int(self.get_argument('offset', 0))
+        limit  = int(self.get_argument('limit', 12))
         data = []
         url = config.NEARBY_API+ "?types=food&rankby=distance&language=zh-CN&sensor=true&location=%s,%s&key=%s"%(lat,lng,config.API_KEY)
         if query is not None:
@@ -39,7 +41,11 @@ class NearbyHandler(tornado.web.RequestHandler):
         print url
         result = checkin.network.https_get(url) 
         j_obj = json.loads(result) 
-        for item in j_obj.get("results", []):
+        for idx, item in enumerate(j_obj.get("results", [])):
+            if idx < offset:
+                continue
+            if idx >= offset + limit:
+                break
             data.append({"lat":item['geometry']['location']['lat'], "lng":item['geometry']['location']['lng'], 'name':item['name'], 'vicinity':item.get('vicinity', "")})
         self.set_header('Content-Type',"application/json" )
         self.write(json.dumps(data))
